@@ -53,6 +53,10 @@ class EscapeCodes:
         self._background_cyan = '\033[46m'
         self._background_white = '\033[47m'
         
+        self._foreground_code = '\033[38;5;{}m'
+        
+        self._background_code = '\033[48;5;{}m'
+        
     # Clear
     
     def clear(self): return self._clear
@@ -132,3 +136,7 @@ class EscapeCodes:
     def background_cyan(self): return self._background_cyan
     
     def background_white(self): return self._background_white
+    
+    def foreground_code(self, x): return self._foreground_code.format(x)
+    
+    def background_code(self, x): return self._background_code.format(x)
