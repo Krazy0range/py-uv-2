@@ -37,9 +37,14 @@ class RenderEngine:
     def render(self):
         self.string(self.esc.move_home())
         print(self._string)
+        self._string = ''
     
-    def add(self, x, y, char):
-        self.string(self.esc.move(x + 1, y + 1) + char)
+    def add(self, x, y, chars):
+        self.string(self.esc.move(x + 1, y + 1) + chars)
+    
+    def fill(self, char):
+        for y in range(self.height):
+            self.add(0, y, char * self.width)
     
     def foreground_color(self, color):
         code = ''
@@ -59,6 +64,8 @@ class RenderEngine:
             code = self.esc.foreground_cyan()
         elif color == 'white':
             code = self.esc.foreground_white()
+        elif color == 'reset':
+            code = self.esc.reset_foreground_color()
         self.string(code)
         
     def background_color(self, color):
@@ -79,4 +86,6 @@ class RenderEngine:
             code = self.esc.background_cyan()
         elif color == 'white':
             code = self.esc.background_white()
+        elif color == 'reset':
+            code = self.esc.reset_background_color()
         self.string(code)

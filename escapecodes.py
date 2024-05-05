@@ -54,8 +54,10 @@ class EscapeCodes:
         self._background_white = '\033[47m'
         
         self._foreground_code = '\033[38;5;{}m'
-        
         self._background_code = '\033[48;5;{}m'
+        
+        self._foreground_rgb = '\033[38;2;{};{};{}m'
+        self._background_rgb = '\033[48;2;{};{};{}m'
         
     # Clear
     
@@ -140,3 +142,7 @@ class EscapeCodes:
     def foreground_code(self, x): return self._foreground_code.format(x)
     
     def background_code(self, x): return self._background_code.format(x)
+    
+    def foreground_rgb(self, r, g, b): return self._foreground_rgb.format(r, g, b)
+    
+    def background_rgb(self, r, g, b): return self._background_rgb.format(r, g, b)
