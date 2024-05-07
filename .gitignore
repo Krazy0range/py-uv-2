@@ -3,3 +3,5 @@ build/
 dist/
 main.spec
 uv-2.spec
+py-uv-2.code-workspace
+uv-2.sh
