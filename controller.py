@@ -27,10 +27,11 @@ class Controller:
         if self.playback.curr_pos >= self.playback.duration:
             model.queue_prev.append(model.queue.pop(0))
             model.queue_full_update = True
-            if len(model.queue) > 0 and self.playback_file != model.queue[0]:
-                self.playback_file = model.queue[0]
-                self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
-            self.playback.play()
+            if len(model.queue) > 0:
+                if self.playback_file != model.queue[0]:
+                    self.playback_file = model.queue[0]
+                    self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
+                self.playback.play()
     
     def handle_console(self, model):
         key = self.get_key()
@@ -65,11 +66,31 @@ class Controller:
             model.quit = True
         
         # rerender
-        if model.command == '99':
+        elif model.command == '99':
             model.library_full_update = True
             model.queue_full_update = True
             model.console_full_update = True
             model.reset_screen = True
+        
+        # sort by filename
+        elif model.command == '900':
+            model.load_mp3s('filename')
+            model.library_full_update = True
+        
+        # sort by artist+album
+        elif model.command == '901':
+            model.load_mp3s('artist+album')
+            model.library_full_update = True
+        
+        # sort by duration
+        elif model.command == '902':
+            model.load_mp3s('duration')
+            model.library_full_update = True
+        
+        # sort randomly
+        elif model.command == '903':
+            model.load_mp3s('random')
+            model.library_full_update = True
         
         # pause
         elif model.command == '1':

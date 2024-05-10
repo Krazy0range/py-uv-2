@@ -1,4 +1,5 @@
 import os
+from random import shuffle
 import mutagen
 
 class Model:
@@ -6,7 +7,7 @@ class Model:
     def __init__(self, mp3_folder):
         self.mp3_folder = mp3_folder
         
-        self.mp3_files = self.get_mp3s()
+        self.mp3_files = self.get_mp3s('filename')
         
         self.command = ''
         self.console = ''
@@ -30,14 +31,26 @@ class Model:
         self.console_full_update = True
         self.reset_screen = False
     
-    def get_mp3s(self):
+    def load_mp3s(self, sort):
+        self.mp3_files = self.get_mp3s(sort)
+    
+    def get_mp3s(self, sort):
         files = []
         
         files = os.listdir(self.mp3_folder)
         
+        if sort == 'random':
+            shuffle(files)
+            return files
+        
         def sorter(file):
             audio = mutagen.File(f'{self.mp3_folder}/{file}', easy=True)
-            return f'{audio['artist']}{audio['album']}'
+            if sort == 'filename':
+                return file
+            elif sort == 'artist+album':
+                return f'{audio['artist']}{audio['album']}'
+            elif sort == 'duration':
+                return audio.info.length
         
         files.sort(key=sorter)
         
