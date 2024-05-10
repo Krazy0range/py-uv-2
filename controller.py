@@ -26,6 +26,7 @@ class Controller:
         
         if self.playback.curr_pos >= self.playback.duration:
             model.queue_prev.append(model.queue.pop(0))
+            model.queue_full_update = True
             if len(model.queue) > 0 and self.playback_file != model.queue[0]:
                 self.playback_file = model.queue[0]
                 self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')

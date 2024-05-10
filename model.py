@@ -1,13 +1,12 @@
 import os
+import mutagen
 
 class Model:
     
     def __init__(self, mp3_folder):
         self.mp3_folder = mp3_folder
         
-        self.mp3_files = os.listdir(self.mp3_folder)
-        
-        self.longest_mp3_file = max(self.mp3_files, key=len)
+        self.mp3_files = self.get_mp3s()
         
         self.command = ''
         self.console = ''
@@ -30,3 +29,16 @@ class Model:
         self.queue_full_update = True
         self.console_full_update = True
         self.reset_screen = False
+    
+    def get_mp3s(self):
+        files = []
+        
+        files = os.listdir(self.mp3_folder)
+        
+        def sorter(file):
+            audio = mutagen.File(f'{self.mp3_folder}/{file}', easy=True)
+            return f'{audio['artist']}{audio['album']}'
+        
+        files.sort(key=sorter)
+        
+        return files

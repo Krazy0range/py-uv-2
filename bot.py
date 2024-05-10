@@ -18,8 +18,8 @@ spotify_converter = 'https://spotifydown.com'
 
 with webdriver.Firefox() as driver:
     for i, spotify_url in enumerate(spotify_urls):
-        driver.execute_script(f'window.open(\'about:blank\', \'tabulation{i}\')')
-        driver.switch_to.window(f'tabulation{i}')
+        # driver.execute_script(f'window.open(\'about:blank\', \'tabulation{i}\')')
+        # driver.switch_to.window(f'tabulation{i}')
         driver.get(spotify_converter)
         sleep(0.5)
         url_input = driver.find_element(By.XPATH, '//input')
@@ -41,4 +41,4 @@ with webdriver.Firefox() as driver:
         filename_new = filename_new.replace('/', ' ')
         shutil.move(filename, f'C:/Users/Teo/Documents/uv-2/mp3s/{filename_new}.mp3')
 
-# TODO: change tab system; it crashes after 20 tabs
+# x TODO: change tab system; it crashes after 20 tabs
