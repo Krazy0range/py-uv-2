@@ -45,7 +45,7 @@ class Controller:
             command = model.console
             model.console = ''
             
-        elif key == '\x08':
+        elif key == '\x08' or key == '.':
             if len(model.console) > 0:
                 model.console = model.console[:-1]
 
@@ -92,6 +92,20 @@ class Controller:
             model.load_mp3s('random')
             model.library_full_update = True
         
+        # toggle showing explicit songs
+        elif model.command == '910':
+            model.showing_explicit_songs = not model.showing_explicit_songs
+            model.load_mp3s('filename')
+            model.library_full_update = True
+        
+        # toggle explicit
+        elif model.command == '911':
+            mp3 = model.mp3_files[model.selected_song_index]
+            model.index['songs'][mp3]['explicit'] = not model.index['songs'][mp3]['explicit']
+            model.save_index()
+            model.load_mp3s('filename')
+            model.library_full_update = True
+                    
         # pause
         elif model.command == '1':
             self.playback.pause()
@@ -115,6 +129,30 @@ class Controller:
                 model.scroll = min(n, len(model.mp3_files) - 1)
                 model.library_full_update = True
         
+        # add
+        elif model.command == '4':
+            model.queue.append(model.mp3_files[model.selected_song_index])
+            if len(model.queue) == 1:
+                if self.playback_file != model.queue[0]:
+                    self.playback_file = model.queue[0]
+                    self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
+                self.playback.play()
+        
+        # add all
+        elif model.command == '44':
+            for song in model.mp3_files:
+                model.queue.append(song)
+            if len(model.queue) == len(model.mp3_files):
+                if self.playback_file != model.queue[0]:
+                    self.playback_file = model.queue[0]
+                    self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
+                self.playback.play()
+
+        # insert
+        elif model.command == '5':
+            model.queue.insert(1, model.mp3_files[model.selected_song_index])
+            model.queue_full_update = True
+        
         # skip
         elif model.command == '7':
             self.playback.stop()
@@ -127,36 +165,12 @@ class Controller:
                     self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
                 self.playback.play()
         
-        # add
-        elif model.command == '4':
-            model.queue.append(model.mp3_files[model.selected_song_index])
-            if len(model.queue) == 1:
-                if self.playback_file != model.queue[0]:
-                    self.playback_file = model.queue[0]
-                    self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
-                self.playback.play()
-
-        # insert
-        elif model.command == '5':
-            model.queue.insert(1, model.mp3_files[model.selected_song_index])
-            model.queue_full_update = True
-        
         # clear queue
         elif model.command == '77':
             model.clear_queue = True
             model.clear_queue_len = len(model.queue) + len(model.queue_prev)
             model.queue = [model.queue[0]]
             model.queue_full_update = True
-        
-        # add all
-        elif model.command == '44':
-            for song in model.mp3_files:
-                model.queue.append(song)
-            if len(model.queue) == len(model.mp3_files):
-                if self.playback_file != model.queue[0]:
-                    self.playback_file = model.queue[0]
-                    self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
-                self.playback.play()
         
         # select song
         elif len(model.command) > 1 and model.command[0] == '0':

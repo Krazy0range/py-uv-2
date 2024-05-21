@@ -49,11 +49,20 @@ class Library(Panel):
             if j < 0: continue
             if j >= len(model.mp3_files): break
             mp3_file = model.mp3_files[j]
+            if not model.showing_explicit_songs and model.index['songs'][mp3_file]['explicit']:
+                continue
             song = mp3_file[:-4]
+            selected = j == model.selected_song_index
             self.string += self.esc.move(x, y + i)
-            self.string += self.esc.background_red() if j == model.selected_song_index else self.esc.background_black()
-            self.string += self.esc.foreground_red() if mp3_file in model.queue and j != model.selected_song_index else self.esc.foreground_white()
+            self.string += self.esc.background_red() if selected else self.esc.background_black()
+            self.string += self.esc.foreground_red() if mp3_file in model.queue and not selected else self.esc.foreground_white()
             self.string += f'{j}{self.tab(str(j))}{song}'
+            if model.index['songs'][mp3_file]['explicit']:
+                self.string += self.esc.move(x + 5, y + i)
+                self.string += self.esc.background_black() if not selected else ''
+                self.string += self.esc.foreground_red() if not selected else ''
+                self.string += 'E'
+                self.string += self.esc.reset_all()
         
         self.string += self.esc.reset_all()
         return self.string
