@@ -11,7 +11,7 @@ class Controller:
         return chr(ord(msvcrt.getch())) if msvcrt.kbhit() else None
     
     def update(self, model):
-        model.command = self.handle_console(model)
+        self.handle_keys(model)
         self.handle_command(model)
         self.handle_queue(model)
         
@@ -33,26 +33,45 @@ class Controller:
                     self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
                 self.playback.play()
     
-    def handle_console(self, model):
+    def handle_keys(self, model):
         key = self.get_key()
         
-        command = ''
-        
         if not key:
-            return command
+            model.command = ''
+            return
         
-        if key == '\r':
-            command = model.console
-            model.console = ''
+        elif key == '\t':
+            if model.focus == 'console':
+                model.focus = 'search'
+            elif model.focus == 'search':
+                model.focus = 'console'
+        
+        elif model.focus == 'console':
             
-        elif key == '\x08' or key == '.':
-            if len(model.console) > 0:
-                model.console = model.console[:-1]
+            if key == '\r':
+                model.command = model.console
+                model.console = ''
+                
+            elif key == '\x08' or key == '.':
+                if len(model.console) > 0:
+                    model.console = model.console[:-1]
 
-        elif key is not None:
-            model.console += key
+            elif key is not None:
+                model.console += key
         
-        return command
+        elif model.focus == 'search':
+            
+            if key == '\r':
+                pass
+            
+            elif key == '\x08' or key == '.':
+                if len(model.search) > 0:
+                    model.search = model.search[:-1]
+                    model.library_full_update = True
+            
+            elif key is not None:
+                model.search += key
+                model.library_full_update = True
 
     def handle_command(self, model):
         

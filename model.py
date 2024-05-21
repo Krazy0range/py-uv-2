@@ -6,20 +6,24 @@ import json
 class Model:
     
     def __init__(self, mp3_folder):
+        self.mp3_folder = mp3_folder
+        
+        self.mp3_files = self.get_mp3s_raw()
         
         self.index_file = "index.json"
         self.index = self.load_index()
+        self.refresh_index()
         
         self.showing_explicit_songs = False
-        
-        self.mp3_folder = mp3_folder
         
         self.mp3_files = self.get_mp3s('filename')
         
         self.refresh_index()
         
         self.command = ''
+        self.focus = 'console'
         self.console = ''
+        self.search = ''
         
         self.quit = False
         
@@ -51,10 +55,11 @@ class Model:
     def refresh_index(self):
         for mp3 in self.mp3_files:
             if mp3 not in self.index["songs"]:
-                self.index[mp3] = {
+                self.index['songs'][mp3] = {
                     'plays': 0,
-                    'explicit': False
+                    'explicit': True
                 }
+        self.save_index()
     
     def reset_index(self):
         data = {
@@ -72,6 +77,9 @@ class Model:
     
     def load_mp3s(self, sort):
         self.mp3_files = self.get_mp3s(sort)
+        
+    def get_mp3s_raw(self):
+        return os.listdir(self.mp3_folder)
     
     def get_mp3s(self, sort):
         files = []

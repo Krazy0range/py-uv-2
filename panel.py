@@ -44,21 +44,27 @@ class Library(Panel):
         width -= 4
         height -= 4
         
-        for i in range(len(model.mp3_files[:height+1])):
+        i_off = 0
+        
+        for i in range(len(model.mp3_files)):
             j = i + model.scroll
             if j < 0: continue
             if j >= len(model.mp3_files): break
+            if i - i_off > height: break;
             mp3_file = model.mp3_files[j]
             if not model.showing_explicit_songs and model.index['songs'][mp3_file]['explicit']:
                 continue
             song = mp3_file[:-4]
+            if model.search.lower() not in song.lower():
+                i_off += 1
+                continue
             selected = j == model.selected_song_index
-            self.string += self.esc.move(x, y + i)
+            self.string += self.esc.move(x, y + i - i_off)
             self.string += self.esc.background_red() if selected else self.esc.background_black()
             self.string += self.esc.foreground_red() if mp3_file in model.queue and not selected else self.esc.foreground_white()
             self.string += f'{j}{self.tab(str(j))}{song}'
             if model.index['songs'][mp3_file]['explicit']:
-                self.string += self.esc.move(x + 5, y + i)
+                self.string += self.esc.move(x + 5, y + i - i_off)
                 self.string += self.esc.background_black() if not selected else ''
                 self.string += self.esc.foreground_red() if not selected else ''
                 self.string += 'E'
@@ -123,8 +129,36 @@ class Console(Panel):
         self.string += self.esc.background_black()
         self.string += self.esc.foreground_red()
         self.string += model.console
-        self.string += self.esc.background_red()
-        self.string += ' '
+        if model.focus == 'console':
+            self.string += self.esc.background_red()
+            self.string += ' '
+        self.string += self.esc.background_black()
+        self.string += ' ' * (width - len(model.console) - 3)
+        
+        self.string += self.esc.reset_all()
+        return self.string
+
+
+class Search(Panel):
+    
+    def __init__(self):
+        super().__init__()
+        
+    def render(self, model, x, y, width, height):
+        self.string = ''
+        self.string += self.esc.reset_all()
+        
+        if self.full_update:
+            self.string += self.fill(x, y, width, height, self.esc.background_black())
+            self.full_update = False
+            
+        self.string += self.esc.move(x+2, y+1)
+        self.string += self.esc.background_black()
+        self.string += self.esc.foreground_red()
+        self.string += model.search
+        if model.focus == 'search':
+            self.string += self.esc.background_red()
+            self.string += ' '
         self.string += self.esc.background_black()
         self.string += ' ' * (width - len(model.console) - 3)
         

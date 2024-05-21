@@ -7,6 +7,7 @@ from renderengine import RenderEngine
 from panel import Library
 from panel import Queue
 from panel import Console
+from panel import Search
 
 class View:
     
@@ -22,6 +23,7 @@ class View:
         self.library = Library()
         self.queue = Queue()
         self.console = Console()
+        self.search = Search()
         
         self.counter = 0
     
@@ -63,10 +65,18 @@ class View:
         console = self.console.render(model,
                                       x=2,
                                       y=self.engine.height - 2,
-                                      width=self.engine.width - 2,
+                                      width=self.engine.width // 2 - 2,
                                       height=2
                                       )
         self.engine.string(console)
+        
+        search = self.search.render(model,
+                                    x=self.engine.width // 2 + 3,
+                                    y=self.engine.height - 2,
+                                    width=self.engine.width // 2 - 3,
+                                    height=2
+                                    )
+        self.engine.string(search)
         
         self.engine.render()
     

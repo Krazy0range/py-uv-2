@@ -12,7 +12,7 @@ spotify_urls = []
 with open(spotify_urls_file, 'r') as file:
     spotify_urls = file.readlines()
     
-spotify_urls = spotify_urls
+spotify_urls = spotify_urls[:]
 
 spotify_converter = 'https://spotifydown.com'
 
@@ -39,6 +39,10 @@ with webdriver.Firefox() as driver:
         audio = mutagen.File(filename, easy=True)
         filename_new = f'{audio['artist'][0]} - {audio['title'][0]}'
         filename_new = filename_new.replace('/', ' ')
-        shutil.move(filename, f'C:/Users/Teo/Documents/uv-2/mp3s/{filename_new}.mp3')
+        filename_new = filename_new.replace('&', ' ')
+        filename_new = filename_new.replace("'", ' ')
+        filename_new = filename_new.replace('"', ' ')
+        filename_new = filename_new.replace('?', ' ')
+        shutil.move(filename, f'C:/Users/Teo/Documents/uv-2/mp3s-new/{filename_new}.mp3')
 
 # x TODO: change tab system; it crashes after 20 tabs
