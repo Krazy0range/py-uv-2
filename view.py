@@ -32,6 +32,7 @@ class View:
         self.library.full_update = model.library_full_update
         self.queue.full_update = model.queue_full_update
         self.console.full_update = model.console_full_update
+        self.search.full_update = model.console_full_update # makeshift fix but should work fine
         
         if model.reset_screen:
             self.engine.clear()
