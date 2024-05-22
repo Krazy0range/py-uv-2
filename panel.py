@@ -160,7 +160,7 @@ class Search(Panel):
             self.string += self.esc.background_red()
             self.string += ' '
         self.string += self.esc.background_black()
-        self.string += ' ' * (width - len(model.console) - 4)
+        self.string += ' ' * (width - len(model.search) - 4)
         
         self.string += self.esc.reset_all()
         return self.string
