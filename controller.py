@@ -12,7 +12,7 @@ class Controller:
     
     def update(self, model):
         self.handle_keys(model)
-        self.handle_command(model)
+        self.handle_commands(model)
         self.handle_queue(model)
         
     def handle_queue(self, model):
@@ -36,9 +36,10 @@ class Controller:
     def handle_keys(self, model):
         key = self.get_key()
         
+        command = ''
+        
         if not key:
-            model.command = ''
-            return
+            pass
         
         elif key == '\t':
             if model.focus == 'console':
@@ -49,7 +50,7 @@ class Controller:
         elif model.focus == 'console':
             
             if key == '\r':
-                model.command = model.console
+                command = model.console
                 model.console = ''
                 
             elif key == '\x08' or key == '.':
@@ -72,53 +73,60 @@ class Controller:
             elif key is not None:
                 model.search += key
                 model.library_full_update = True
-
-    def handle_command(self, model):
         
-        if not model.command:
+        model.command = command
+    
+    def handle_commands(self, model):
+        commands = model.command.split('+')
+        for command in commands:
+            self.handle_command(model, command)
+
+    def handle_command(self, model, command):
+        
+        if not command:
             return
         
         # Bruh idk ;-;
         
         # quit
-        if model.command == '9':
+        if command == '9':
             model.quit = True
         
         # rerender
-        elif model.command == '99':
+        elif command == '99':
             model.library_full_update = True
             model.queue_full_update = True
             model.console_full_update = True
             model.reset_screen = True
         
         # sort by filename
-        elif model.command == '900':
+        elif command == '900':
             model.load_mp3s('filename')
             model.library_full_update = True
         
         # sort by artist+album
-        elif model.command == '901':
+        elif command == '901':
             model.load_mp3s('artist+album')
             model.library_full_update = True
         
         # sort by duration
-        elif model.command == '902':
+        elif command == '902':
             model.load_mp3s('duration')
             model.library_full_update = True
         
         # sort randomly
-        elif model.command == '903':
+        elif command == '903':
             model.load_mp3s('random')
             model.library_full_update = True
         
         # toggle showing explicit songs
-        elif model.command == '910':
+        elif command == '910':
             model.showing_explicit_songs = not model.showing_explicit_songs
             model.load_mp3s('filename')
             model.library_full_update = True
         
         # toggle explicit
-        elif model.command == '911':
+        elif command == '911':
             mp3 = model.mp3_files[model.selected_song_index]
             model.index['songs'][mp3]['explicit'] = not model.index['songs'][mp3]['explicit']
             model.save_index()
@@ -126,30 +134,30 @@ class Controller:
             model.library_full_update = True
                     
         # pause
-        elif model.command == '1':
+        elif command == '1':
             self.playback.pause()
         
         # resume
-        elif model.command == '11':
+        elif command == '11':
             self.playback.resume()
         
         # seek
-        elif len(model.command) > 1 and model.command[0] == '2':
-            n = model.command[1:]
+        elif len(command) > 1 and command[0] == '2':
+            n = command[1:]
             if n.isnumeric():
                 n = int(n)
                 self.playback.seek(n)
         
         # scroll
-        elif len(model.command) > 1 and model.command[0] == '3':
-            n = model.command[1:]
+        elif len(command) > 1 and command[0] == '3':
+            n = command[1:]
             if n.isnumeric():
                 n = int(n)
                 model.scroll = min(n, len(model.mp3_files) - 1)
                 model.library_full_update = True
         
         # add
-        elif model.command == '4':
+        elif command == '4':
             model.queue.append(model.mp3_files[model.selected_song_index])
             if len(model.queue) == 1:
                 if self.playback_file != model.queue[0]:
@@ -158,7 +166,7 @@ class Controller:
                 self.playback.play()
         
         # add all
-        elif model.command == '44':
+        elif command == '44':
             for song in model.mp3_files:
                 model.queue.append(song)
             if len(model.queue) == len(model.mp3_files):
@@ -168,12 +176,12 @@ class Controller:
                 self.playback.play()
 
         # insert
-        elif model.command == '5':
+        elif command == '5':
             model.queue.insert(1, model.mp3_files[model.selected_song_index])
             model.queue_full_update = True
         
         # skip
-        elif model.command == '7':
+        elif command == '7':
             self.playback.stop()
             if len(model.queue) > 0:
                 model.queue_prev.append(model.queue.pop(0))
@@ -185,16 +193,16 @@ class Controller:
                 self.playback.play()
         
         # clear queue
-        elif model.command == '77':
+        elif command == '77':
             model.clear_queue = True
             model.clear_queue_len = len(model.queue) + len(model.queue_prev)
             model.queue = [model.queue[0]]
             model.queue_full_update = True
         
         # select song
-        elif len(model.command) > 1 and model.command[0] == '0':
-            number = model.command[1:]
+        elif len(command) > 1 and command[0] == '0':
+            number = command[1:]
             if number.isnumeric():
-                number = int(model.command[1:])
+                number = int(command[1:])
                 if number >= -1 and number < len(model.mp3_files):
                     model.selected_song_index = number
