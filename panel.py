@@ -62,7 +62,7 @@ class Library(Panel):
             self.string += self.esc.move(x, y + i - i_off)
             self.string += self.esc.background_red() if selected else self.esc.background_black()
             self.string += self.esc.foreground_red() if mp3_file in model.queue and not selected else self.esc.foreground_white()
-            self.string += f'{j}{self.tab(str(j))}{song}'
+            self.string += f'{j}{self.tab(str(j))}{song}'[:width-1]
             if model.index['songs'][mp3_file]['explicit']:
                 self.string += self.esc.move(x + 5, y + i - i_off)
                 self.string += self.esc.background_black() if not selected else ''
@@ -102,7 +102,7 @@ class Queue(Panel):
             self.string += self.esc.move(x, y + i)
             self.string += self.esc.background_red() if i == 0 else self.esc.background_black()
             self.string += str(i) + self.tab(str(i))
-            self.string += song
+            self.string += song[:width-9]
         
         self.string += self.esc.move(x, y + len(mp3_files))
         self.string += self.esc.background_black()

@@ -44,5 +44,3 @@ with webdriver.Firefox() as driver:
         filename_new = filename_new.replace('"', ' ')
         filename_new = filename_new.replace('?', ' ')
         shutil.move(filename, f'C:/Users/Teo/Documents/uv-2/mp3s-new/{filename_new}.mp3')
-
-# x TODO: change tab system; it crashes after 20 tabs
