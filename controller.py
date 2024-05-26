@@ -77,9 +77,13 @@ class Controller:
         model.command = command
     
     def handle_commands(self, model):
-        commands = model.command.split('+')
-        for command in commands:
-            self.handle_command(model, command)
+        # when defining macros don't split the plusses
+        if len(model.command) > 2 and model.command[:2] == '-+':
+            self.handle_command(model, model.command)
+        else:
+            commands = model.command.split('+')
+            for command in commands:
+                self.handle_command(model, command)
 
     def handle_command(self, model, command):
         
@@ -125,13 +129,47 @@ class Controller:
             model.load_mp3s('filename')
             model.library_full_update = True
         
-        # toggle explicit
+        # set showing explicit songs to false
+        elif command == '9100':
+            if model.showing_explicit_songs:
+                model.showing_explicit_songs = False
+                model.load_mp3s('filename')
+                model.library_full_update = True
+        
+        # set showing explicit songs to true
+        elif command == '9101':
+            if not model.showing_explicit_songs:
+                model.showing_explicit_songs = True
+                model.load_mp3s('filename')
+                model.library_full_update = True
+        
+        # toggle a song's explicitness
         elif command == '911':
             mp3 = model.mp3_files[model.selected_song_index]
             model.index['songs'][mp3]['explicit'] = not model.index['songs'][mp3]['explicit']
             model.save_index()
             model.load_mp3s('filename')
             model.library_full_update = True
+            
+        # run macro
+        elif len(command) > 2 and command[:2] == '--':
+            param = command[2:]
+            if param in model.index['macros']:
+                model.console = model.index['macros'][param]
+        
+        # save macro
+        elif len(command) > 3 and command[:2] == '-+':
+            param0 = command[2]
+            param1 = command[3:]
+            model.index['macros'][param0] = param1
+            model.save_index()
+        
+        # delete macro
+        elif len(command) > 2 and command[:2] == '-0':
+            param = command[2:]
+            if param in model.index['macros']:
+                del model.index['macros'][param]
+                model.save_index()
                     
         # pause
         elif command == '1':
@@ -156,7 +194,7 @@ class Controller:
                 model.scroll = min(n, len(model.mp3_files) - 1)
                 model.library_full_update = True
         
-        # add
+        # add selected song
         elif command == '4':
             model.queue.append(model.mp3_files[model.selected_song_index])
             if len(model.queue) == 1:
@@ -164,6 +202,19 @@ class Controller:
                     self.playback_file = model.queue[0]
                     self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
                 self.playback.play()
+        
+        # select song and add it
+        elif len(command) > 2 and command[:2] == '40':
+            number = command[2:]
+            if number.isnumeric():
+                number = int(number)
+                if number >= -1 and number < len(model.mp3_files):
+                    model.queue.append(model.mp3_files[number])
+                    if len(model.queue) == 1:
+                        if self.playback_file != model.queue[0]:
+                            self.playback_file = model.queue[0]
+                            self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
+                        self.playback.play()
         
         # add all
         elif command == '44':
@@ -203,6 +254,6 @@ class Controller:
         elif len(command) > 1 and command[0] == '0':
             number = command[1:]
             if number.isnumeric():
-                number = int(command[1:])
+                number = int(number)
                 if number >= -1 and number < len(model.mp3_files):
                     model.selected_song_index = number

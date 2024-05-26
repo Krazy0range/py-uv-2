@@ -46,7 +46,15 @@ class Model:
         
     def load_index(self):
         with open(self.index_file, 'r') as f:
-            return json.load(f)
+            data = json.load(f)
+            
+            if 'songs' not in data:
+                data['songs'] = {}
+            
+            if 'macros' not in data:
+                data['macros'] = {}
+            
+            return data
     
     def save_index(self):
         with open(self.index_file, 'w') as f:
@@ -63,7 +71,8 @@ class Model:
     
     def reset_index(self):
         data = {
-            "songs": {}
+            "songs": {},
+            "macros": {}
         }
         for mp3 in self.mp3_files:
             _data = {
