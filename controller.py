@@ -248,13 +248,15 @@ class Controller:
         
         # clear queue except for currently playing song
         elif command == '77':
-            model.queue = [model.queue[0]]
-            model.queue_full_update = True
+            if len(model.queue) > 0:
+                model.queue = [model.queue[0]]
+                model.queue_full_update = True
         
         # clear entire queue
         elif command == '777':
-            model.queue = []
-            model.queue_full_update = True
+            if len(model.queue) > 0:
+                model.queue = []
+                model.queue_full_update = True
         
         # select song
         elif len(command) > 1 and command[0] == '0':
