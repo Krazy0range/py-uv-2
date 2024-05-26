@@ -26,7 +26,7 @@ class Model:
         self.search = ''
         
         # keep updated with controller.py's commands
-        self.commands = [
+        self.syntax_highlight_commands = [
             '9',
             '99',
             '900',

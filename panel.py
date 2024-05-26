@@ -142,7 +142,7 @@ class Console(Panel):
         command_built = ''
         
         def command_part():
-            for command in model.commands:
+            for command in model.syntax_highlight_commands:
                 if command[0:len(command_built)] == command_built:
                     return True
             return False
