@@ -246,11 +246,14 @@ class Controller:
                     self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
                 self.playback.play()
         
-        # clear queue
+        # clear queue except for currently playing song
         elif command == '77':
-            model.clear_queue = True
-            model.clear_queue_len = len(model.queue) + len(model.queue_prev)
             model.queue = [model.queue[0]]
+            model.queue_full_update = True
+        
+        # clear entire queue
+        elif command == '777':
+            model.queue = []
             model.queue_full_update = True
         
         # select song
