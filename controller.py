@@ -152,24 +152,27 @@ class Controller:
             model.library_full_update = True
             
         # run macro
-        elif len(command) > 2 and command[:2] == '--':
-            param = command[2:]
-            if param in model.index['macros']:
-                model.console = model.index['macros'][param]
+        elif len(command) == 3 and command[:2] == '--':
+            param = command[2]
+            if param.isalpha():
+                if param in model.index['macros']:
+                    model.console = model.index['macros'][param]
         
         # save macro
         elif len(command) > 3 and command[:2] == '-+':
             param0 = command[2]
-            param1 = command[3:]
-            model.index['macros'][param0] = param1
-            model.save_index()
+            if param0.isalpha():
+                param1 = command[3:]
+                model.index['macros'][param0] = param1
+                model.save_index()
         
         # delete macro
-        elif len(command) > 2 and command[:2] == '-0':
-            param = command[2:]
-            if param in model.index['macros']:
-                del model.index['macros'][param]
-                model.save_index()
+        elif len(command) == 3 and command[:2] == '-0':
+            param = command[2]
+            if param.isalpha():
+                if param in model.index['macros']:
+                    del model.index['macros'][param]
+                    model.save_index()
                     
         # pause
         elif command == '1':

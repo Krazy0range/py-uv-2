@@ -1,4 +1,3 @@
-from platform import java_ver
 from escapecodes import EscapeCodes
 
 
@@ -128,7 +127,7 @@ class Console(Panel):
         self.string += self.esc.move(x+2, y+1)
         self.string += self.esc.background_black()
         self.string += self.esc.foreground_red()
-        self.string += model.console
+        self.string += self.enhance_console(model.console)
         if model.focus == 'console':
             self.string += self.esc.background_red()
             self.string += ' '
@@ -137,6 +136,24 @@ class Console(Panel):
         
         self.string += self.esc.reset_all()
         return self.string
+    
+    def enhance_console(self, console):
+        enhanced = ''
+        
+        for char in console:
+            if char == '-' or char == '+':
+                enhanced += self.esc.foreground_white()
+                # enhanced += self.esc.dim_mode()
+            elif char.isalpha():
+                enhanced += self.esc.foreground_yellow()
+            enhanced += char
+            if char == '-' or char == '+' or char.isalpha():
+                enhanced += self.esc.foreground_red()
+                # enhanced += self.esc.reset_all()
+                # enhanced += self.esc.background_black()
+                # enhanced += self.esc.foreground_red()
+        
+        return enhanced
 
 
 class Search(Panel):
