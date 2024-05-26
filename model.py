@@ -25,6 +25,34 @@ class Model:
         self.console = ''
         self.search = ''
         
+        # keep updated with controller.py's commands
+        self.commands = [
+            '9',
+            '99',
+            '900',
+            '901',
+            '902',
+            '903',
+            '910',
+            '9100',
+            '9101',
+            '911',
+            '80',
+            '81',
+            '82',
+            '1',
+            '11',
+            '2',
+            '3',
+            '4',
+            '40',
+            '44',
+            '5',
+            '7',
+            '77',
+            '0'
+        ]
+        
         self.quit = False
         
         self.selected_song_index = -1

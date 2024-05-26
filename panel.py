@@ -127,7 +127,7 @@ class Console(Panel):
         self.string += self.esc.move(x+2, y+1)
         self.string += self.esc.background_black()
         self.string += self.esc.foreground_red()
-        self.string += self.enhance_console(model.console)
+        self.string += self.enhance_console(model)
         if model.focus == 'console':
             self.string += self.esc.background_red()
             self.string += ' '
@@ -137,21 +137,35 @@ class Console(Panel):
         self.string += self.esc.reset_all()
         return self.string
     
-    def enhance_console(self, console):
+    def enhance_console(self, model):
         enhanced = ''
+        command_built = ''
         
-        for char in console:
-            if char == '-' or char == '+':
+        def command_part():
+            for command in model.commands:
+                if command[0:len(command_built)] == command_built:
+                    return True
+            return False
+        
+        for char in model.console:
+            if char != '+' and not char.isalpha():
+                command_built += char
+            else:
+                command_built = ''
+            
+            if char == '+':
+                enhanced += self.esc.dim_mode()
                 enhanced += self.esc.foreground_white()
-                # enhanced += self.esc.dim_mode()
-            elif char.isalpha():
+            elif command_part():
                 enhanced += self.esc.foreground_yellow()
-            enhanced += char
-            if char == '-' or char == '+' or char.isalpha():
+            else:
                 enhanced += self.esc.foreground_red()
-                # enhanced += self.esc.reset_all()
-                # enhanced += self.esc.background_black()
-                # enhanced += self.esc.foreground_red()
+                
+            enhanced += char
+            
+            if char == '+':
+                enhanced += self.esc.reset_all()
+                enhanced += self.esc.background_black()
         
         return enhanced
 

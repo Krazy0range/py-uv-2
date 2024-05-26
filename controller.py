@@ -78,7 +78,7 @@ class Controller:
     
     def handle_commands(self, model):
         # when defining macros don't split the plusses
-        if len(model.command) > 2 and model.command[:2] == '-+':
+        if len(model.command) > 2 and model.command[:2] == '81':
             self.handle_command(model, model.command)
         else:
             commands = model.command.split('+')
@@ -152,14 +152,14 @@ class Controller:
             model.library_full_update = True
             
         # run macro
-        elif len(command) == 3 and command[:2] == '--':
+        elif len(command) == 3 and command[:2] == '80':
             param = command[2]
             if param.isalpha():
                 if param in model.index['macros']:
                     model.console = model.index['macros'][param]
         
         # save macro
-        elif len(command) > 3 and command[:2] == '-+':
+        elif len(command) > 3 and command[:2] == '81':
             param0 = command[2]
             if param0.isalpha():
                 param1 = command[3:]
@@ -167,7 +167,7 @@ class Controller:
                 model.save_index()
         
         # delete macro
-        elif len(command) == 3 and command[:2] == '-0':
+        elif len(command) == 3 and command[:2] == '82':
             param = command[2]
             if param.isalpha():
                 if param in model.index['macros']:
