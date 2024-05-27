@@ -1,4 +1,5 @@
 import msvcrt
+import ctypes
 from just_playback import Playback
 
 class Controller:
@@ -14,6 +15,7 @@ class Controller:
         self.handle_keys(model)
         self.handle_commands(model)
         self.handle_queue(model)
+        self.title_terminal(model)
         
     def handle_queue(self, model):
         if len(model.queue) == 0:
@@ -255,6 +257,7 @@ class Controller:
         # clear entire queue
         elif command == '777':
             if len(model.queue) > 0:
+                self.playback.stop()
                 model.queue = []
                 model.queue_full_update = True
         
@@ -265,3 +268,12 @@ class Controller:
                 number = int(number)
                 if number >= -1 and number < len(model.mp3_files):
                     model.selected_song_index = number
+    
+    def title_terminal(self, model):
+        title = ''
+        if len(model.queue) > 0:
+            title = 'uv-2: ' + model.queue[0][:-4]
+        else:
+            title = 'uv-2'
+        
+        ctypes.windll.kernel32.SetConsoleTitleW(title)
