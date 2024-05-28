@@ -3,6 +3,8 @@ from random import shuffle
 import mutagen
 import json
 
+from panel import Library, Queue, Console, Search
+
 class Model:
     
     def __init__(self, mp3_folder):
@@ -21,7 +23,6 @@ class Model:
         self.refresh_index()
         
         self.command = ''
-        self.focus = 'console'
         self.console = ''
         self.search = ''
         
@@ -59,19 +60,15 @@ class Model:
         self.selected_song_index = -1
 
         self.queue = []
-        self.queue_prev = []
         
-        self.clear_queue_prev = False
-        self.clear_queue_prev_len = 0
-        self.clear_queue = False
-        self.clear_queue_len = 0
-        
-        self.scroll = 0
-        
-        self.library_full_update = True
-        self.queue_full_update = True
-        self.console_full_update = True
         self.reset_screen = False
+        
+        self.panel_library = Library()
+        self.panel_queue = Queue()
+        self.panel_console = Console()
+        self.panel_search = Search()
+        
+        self.focused_panel = self.panel_library
         
     def load_index(self):
         with open(self.index_file, 'r') as f:
@@ -137,12 +134,11 @@ class Model:
                 string += f'{audio['artist']}{audio['album']}'
             elif sort == 'duration':
                 string += str(audio.info.length)
-            e_sort = ''
-            if not self.showing_explicit_songs:
-                e_sort = '0' if not self.index['songs'][file]['explicit'] else '1'
-            string = e_sort + string
             return string
         
+        if not self.showing_explicit_songs:
+            files = list(filter(lambda x: not self.index['songs'][x]['explicit'], files))
+            
         files.sort(key=sorter)
         
         return files

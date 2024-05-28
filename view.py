@@ -20,20 +20,12 @@ class View:
         self.settings = Settings()
         self.engine = RenderEngine(width, height)
         
-        self.library = Library()
-        self.queue = Queue()
-        self.console = Console()
-        self.search = Search()
-        
         self.counter = 0
     
     def render(self, model):
         
-        self.library.full_update = model.library_full_update
-        self.queue.full_update = model.queue_full_update
-        self.console.full_update = model.console_full_update
-        self.search.full_update = model.console_full_update # makeshift fix but should work fine
-        
+        self.update_panel_focuses(model)
+
         if model.reset_screen:
             self.engine.clear()
             terminal_size = os.get_terminal_size()
@@ -41,13 +33,9 @@ class View:
             height = terminal_size[1]
             self.engine.width = width
             self.engine.height = height
+            model.reset_screen = False
         
-        model.library_full_update = False
-        model.queue_full_update = False
-        model.console_full_update = False
-        model.reset_screen = False
-        
-        library = self.library.render(model, 
+        library = model.panel_library.render(model, 
                                       x=2, 
                                       y=1, 
                                       width=self.engine.width // 2 - 2, 
@@ -55,7 +43,7 @@ class View:
                                       )
         self.engine.string(library)
         
-        queue = self.queue.render(model,
+        queue = model.panel_queue.render(model,
                                     x=self.engine.width // 2 + 3,
                                     y=1,
                                     width=self.engine.width // 2 - 3,
@@ -63,7 +51,7 @@ class View:
                                     )
         self.engine.string(queue)
         
-        console = self.console.render(model,
+        console = model.panel_console.render(model,
                                       x=2,
                                       y=self.engine.height - 2,
                                       width=self.engine.width // 2 - 2,
@@ -71,7 +59,7 @@ class View:
                                       )
         self.engine.string(console)
         
-        search = self.search.render(model,
+        search = model.panel_search.render(model,
                                     x=self.engine.width // 2 + 3,
                                     y=self.engine.height - 2,
                                     width=self.engine.width // 2 - 3,
@@ -80,6 +68,19 @@ class View:
         self.engine.string(search)
         
         self.engine.render()
+        
+        model.panel_library.full_update = False
+        model.panel_queue.full_update = False
+        model.panel_console.full_update = False
+        model.panel_search.full_update = False
+    
+    def update_panel_focuses(self, model):
+        model.panel_library.focused = False
+        model.panel_queue.focused = False
+        model.panel_console.focused = False
+        model.panel_search.focused = False
+
+        model.focused_panel.focused = True
     
     def start(self):
         self.engine.start()

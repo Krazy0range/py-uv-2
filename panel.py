@@ -26,8 +26,15 @@ class Library(Panel):
     
     def __init__(self):
         super().__init__()
+        self.selected_index = 0
+        self.scroll = 0
+        self.scroll_height = 0
     
     def render(self, model, x, y, width, height):
+        focused = model.focused_panel == self
+        
+        self.scroll_height = height - 4
+        
         self.string = ''
         self.string += self.esc.reset_all()
         
@@ -46,10 +53,10 @@ class Library(Panel):
         i_off = 0
         
         for i in range(len(model.mp3_files)):
-            j = i + model.scroll
+            j = i + self.scroll
             if j < 0: continue
             if j >= len(model.mp3_files): break
-            if i - i_off > height: break;
+            if i - i_off > height: break
             mp3_file = model.mp3_files[j]
             if not model.showing_explicit_songs and model.index['songs'][mp3_file]['explicit']:
                 continue
@@ -57,15 +64,15 @@ class Library(Panel):
             if model.search.lower() not in song.lower():
                 i_off += 1
                 continue
-            selected = j == model.selected_song_index
+            selected = j == self.selected_index
             self.string += self.esc.move(x, y + i - i_off)
-            self.string += self.esc.background_red() if selected else self.esc.background_black()
-            self.string += self.esc.foreground_red() if mp3_file in model.queue and not selected else self.esc.foreground_white()
+            self.string += self.esc.background_red() if selected and focused else self.esc.background_black()
+            self.string += self.esc.foreground_red() if mp3_file in model.queue and not (selected and focused) else self.esc.foreground_white()
             self.string += f'{j}{self.tab(str(j))}{song}'[:width-1]
             if model.index['songs'][mp3_file]['explicit']:
                 self.string += self.esc.move(x + 5, y + i - i_off)
-                self.string += self.esc.background_black() if not selected else ''
-                self.string += self.esc.foreground_red() if not selected else ''
+                self.string += self.esc.background_black() if not (selected and focused) else ''
+                self.string += self.esc.foreground_red() if not (selected and focused) else ''
                 self.string += 'E'
                 self.string += self.esc.reset_all()
         
@@ -77,8 +84,15 @@ class Queue(Panel):
     
     def __init__(self):
         super().__init__()
+        self.selected_index = 0
+        self.scroll = 0
+        self.scroll_height = 0
         
     def render(self, model, x, y, width, height):
+        focused = model.focused_panel == self
+        
+        self.scroll_height = height - 4
+        
         self.string = ''
         self.string += self.esc.reset_all()
         
@@ -94,13 +108,19 @@ class Queue(Panel):
         width -= 4
         height -= 4
         
-        mp3_files = model.queue[:height+1]
+        mp3_files = model.queue
         
-        for i, mp3_file in enumerate(mp3_files):
+        # for i, mp3_file in enumerate(mp3_files):
+        for i in range(len(mp3_files)):
+            j = i + self.scroll
+            if j < 0: continue
+            if j >= len(mp3_files): break
+            if i > height: break
+            mp3_file = mp3_files[j]
             song = mp3_file[:-4]
             self.string += self.esc.move(x, y + i)
-            self.string += self.esc.background_red() if i == 0 else self.esc.background_black()
-            self.string += str(i) + self.tab(str(i))
+            self.string += self.esc.background_red() if j == self.selected_index and focused else self.esc.background_black()
+            self.string += str(j) + self.tab(str(j))
             self.string += song[:width-9]
         
         self.string += self.esc.move(x, y + len(mp3_files))
@@ -117,6 +137,8 @@ class Console(Panel):
         super().__init__()
         
     def render(self, model, x, y, width, height):
+        focused = model.focused_panel == self
+        
         self.string = ''
         self.string += self.esc.reset_all()
         
@@ -128,7 +150,7 @@ class Console(Panel):
         self.string += self.esc.background_black()
         self.string += self.esc.foreground_red()
         self.string += self.enhance_console(model)
-        if model.focus == 'console':
+        if focused:
             self.string += self.esc.background_red()
             self.string += ' '
         self.string += self.esc.background_black()
@@ -176,6 +198,8 @@ class Search(Panel):
         super().__init__()
         
     def render(self, model, x, y, width, height):
+        focused = model.focused_panel == self
+        
         self.string = ''
         self.string += self.esc.reset_all()
         
@@ -187,7 +211,7 @@ class Search(Panel):
         self.string += self.esc.background_black()
         self.string += self.esc.foreground_red()
         self.string += model.search
-        if model.focus == 'search':        
+        if focused:
             self.string += self.esc.background_red()
             self.string += ' '
         self.string += self.esc.background_black()

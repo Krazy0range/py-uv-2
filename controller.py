@@ -46,8 +46,8 @@ class Controller:
             self.playback.play()
         
         if self.playback.curr_pos >= self.playback.duration:
-            model.queue_prev.append(model.queue.pop(0))
-            model.queue_full_update = True
+            model.queue.pop(0)
+            model.panel_queue.full_update = True
             if len(model.queue) > 0:
                 if self.playback_file != model.queue[0]:
                     self.playback_file = model.queue[0]
@@ -62,31 +62,96 @@ class Controller:
         if not key:
             pass
         
-        elif key == 'up':
-            model.selected_song_index -= 1
-        
-        elif key == 'down':
-            model.selected_song_index += 1
-        
         elif key == '\t':
-            if model.focus == 'console':
-                model.focus = 'search'
-            elif model.focus == 'search':
-                model.focus = 'console'
-        
-        elif model.focus == 'console':
+            
+            # cycle through focuses
+            
+            if model.focused_panel == model.panel_library:
+                model.focused_panel = model.panel_queue
+
+            elif model.focused_panel == model.panel_queue:
+                model.focused_panel = model.panel_console
+
+            elif model.focused_panel == model.panel_console:
+                model.focused_panel = model.panel_search
+
+            elif model.focused_panel == model.panel_search:
+                model.focused_panel = model.panel_library
+
+        elif model.focused_panel == model.panel_library:
             
             if key == '\r':
-                if len(model.console) > 0:
-                    command = model.console
-                    model.console = ''
-                else:
-                    model.queue.append(model.mp3_files[model.selected_song_index])
-                    if len(model.queue) == 1:
+                model.queue.append(model.mp3_files[model.panel_library.selected_index])
+                if len(model.queue) == 1:
+                    if self.playback_file != model.queue[0]:
+                        self.playback_file = model.queue[0]
+                        self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
+                    self.playback.play()
+                
+            elif key == 'up':
+                if model.panel_library.selected_index > 0:
+                    model.panel_library.selected_index -= 1
+                    
+                    if model.panel_library.selected_index >= len(model.mp3_files):
+                        model.panel_library.selected_index = len(model.mp3_files)
+                    
+                    if model.panel_library.selected_index < model.panel_library.scroll:
+                        model.panel_library.scroll = model.panel_library.selected_index
+                        model.panel_library.full_update = True
+            
+            elif key == 'down':
+                if model.panel_library.selected_index < len(model.mp3_files) - 1:
+                    model.panel_library.selected_index += 1
+                    
+                    if model.panel_library.selected_index >= len(model.mp3_files):
+                        model.panel_library.selected_index = len(model.mp3_files) - 1                   
+                    
+                    if model.panel_library.selected_index > model.panel_library.scroll + model.panel_library.scroll_height:
+                        model.panel_library.scroll = model.panel_library.selected_index - model.panel_library.scroll_height
+                        model.panel_library.full_update = True
+
+        elif model.focused_panel == model.panel_queue:
+            
+            if key == '\r':
+                del model.queue[model.panel_queue.selected_index]
+                model.panel_queue.full_update = True
+                if model.panel_queue.selected_index == 0:
+                    self.playback.stop()
+                    if len(model.queue) > 0:
                         if self.playback_file != model.queue[0]:
                             self.playback_file = model.queue[0]
                             self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
                         self.playback.play()
+                elif model.panel_queue.selected_index == len(model.queue):
+                    model.panel_queue.selected_index -= 1
+                
+            elif key == 'up':
+                if model.panel_queue.selected_index > 0:
+                    model.panel_queue.selected_index -= 1
+                    
+                    if model.panel_queue.selected_index >= len(model.queue):
+                        model.panel_queue.selected_index = len(model.queue) - 1
+                    
+                    if model.panel_queue.selected_index < model.panel_queue.scroll:
+                        model.panel_queue.scroll = model.panel_queue.selected_index
+                        model.panel_queue.full_update = True
+            
+            elif key == 'down':
+                if model.panel_queue.selected_index < len(model.queue) - 1:
+                    model.panel_queue.selected_index += 1
+                    
+                    if model.panel_queue.selected_index >= len(model.queue):
+                        model.panel_queue.selected_index = len(model.queue) - 1
+                    
+                    if model.panel_queue.selected_index > model.panel_queue.scroll + model.panel_queue.scroll_height:
+                        model.panel_queue.scroll = model.panel_queue.selected_index - model.panel_queue.scroll_height
+                        model.panel_queue.full_update = True
+        
+        elif model.focused_panel == model.panel_console:
+            
+            if key == '\r':
+                    command = model.console
+                    model.console = ''
                 
             elif key == '\x08' or key == '.':
                 if len(model.console) > 0:
@@ -95,7 +160,7 @@ class Controller:
             elif key is not None:
                 model.console += key
         
-        elif model.focus == 'search':
+        elif model.focused_panel == model.panel_search:
             
             if key == '\r':
                 pass
@@ -103,11 +168,11 @@ class Controller:
             elif key == '\x08' or key == '.':
                 if len(model.search) > 0:
                     model.search = model.search[:-1]
-                    model.library_full_update = True
+                    model.panel_library.full_update = True
             
             elif key is not None:
                 model.search += key
-                model.library_full_update = True
+                model.panel_library.full_update = True
         
         model.command = command
     
@@ -133,58 +198,59 @@ class Controller:
         
         # rerender
         elif command == '99':
-            model.library_full_update = True
-            model.queue_full_update = True
-            model.console_full_update = True
             model.reset_screen = True
+            model.panel_library.full_update = True
+            model.panel_queue.full_update = True
+            model.panel_console.full_update = True
+            model.panel_search.full_update = True
         
         # sort by filename
         elif command == '900':
             model.load_mp3s('filename')
-            model.library_full_update = True
+            model.panel_library.full_update = True
         
         # sort by artist+album
         elif command == '901':
             model.load_mp3s('artist+album')
-            model.library_full_update = True
+            model.panel_library.full_update = True
         
         # sort by duration
         elif command == '902':
             model.load_mp3s('duration')
-            model.library_full_update = True
+            model.panel_library.full_update = True
         
         # sort randomly
         elif command == '903':
             model.load_mp3s('random')
-            model.library_full_update = True
+            model.panel_library.full_update = True
         
         # toggle showing explicit songs
         elif command == '910':
             model.showing_explicit_songs = not model.showing_explicit_songs
             model.load_mp3s('filename')
-            model.library_full_update = True
+            model.panel_library.full_update = True
         
         # set showing explicit songs to false
         elif command == '9100':
             if model.showing_explicit_songs:
                 model.showing_explicit_songs = False
                 model.load_mp3s('filename')
-                model.library_full_update = True
+                model.panel_library.full_update = True
         
         # set showing explicit songs to true
         elif command == '9101':
             if not model.showing_explicit_songs:
                 model.showing_explicit_songs = True
                 model.load_mp3s('filename')
-                model.library_full_update = True
+                model.panel_library.full_update = True
         
         # toggle a song's explicitness
         elif command == '911':
-            mp3 = model.mp3_files[model.selected_song_index]
+            mp3 = model.mp3_files[model.panel_library.selected_index]
             model.index['songs'][mp3]['explicit'] = not model.index['songs'][mp3]['explicit']
             model.save_index()
             model.load_mp3s('filename')
-            model.library_full_update = True
+            model.panel_library.full_update = True
             
         # run macro
         elif len(command) == 3 and command[:2] == '80':
@@ -229,12 +295,12 @@ class Controller:
             n = command[1:]
             if n.isnumeric():
                 n = int(n)
-                model.scroll = min(n, len(model.mp3_files) - 1)
-                model.library_full_update = True
+                model.panel_library.scroll = min(n, len(model.mp3_files) - 1)
+                model.panel_library.full_update = True
         
         # add selected song
         elif command == '4':
-            model.queue.append(model.mp3_files[model.selected_song_index])
+            model.queue.append(model.mp3_files[model.panel_library.selected_index])
             if len(model.queue) == 1:
                 if self.playback_file != model.queue[0]:
                     self.playback_file = model.queue[0]
@@ -266,15 +332,15 @@ class Controller:
 
         # insert
         elif command == '5':
-            model.queue.insert(1, model.mp3_files[model.selected_song_index])
-            model.queue_full_update = True
+            model.queue.insert(1, model.mp3_files[model.panel_library.selected_index])
+            model.panel_queue.full_update = True
         
         # skip
         elif command == '7':
             self.playback.stop()
             if len(model.queue) > 0:
-                model.queue_prev.append(model.queue.pop(0))
-                model.queue_full_update = True
+                model.queue.pop(0)
+                model.panel_queue.full_update = True
             if len(model.queue) > 0:
                 if self.playback_file != model.queue[0]:
                     self.playback_file = model.queue[0]
@@ -285,14 +351,14 @@ class Controller:
         elif command == '77':
             if len(model.queue) > 0:
                 model.queue = [model.queue[0]]
-                model.queue_full_update = True
+                model.panel_queue.full_update = True
         
         # clear entire queue
         elif command == '777':
             if len(model.queue) > 0:
                 self.playback.stop()
                 model.queue = []
-                model.queue_full_update = True
+                model.panel_queue.full_update = True
         
         # select song
         elif len(command) > 1 and command[0] == '0':
@@ -300,7 +366,7 @@ class Controller:
             if number.isnumeric():
                 number = int(number)
                 if number >= -1 and number < len(model.mp3_files):
-                    model.selected_song_index = number
+                    model.panel_library.selected_index = number
     
     def title_terminal(self, model):
         title = ''
