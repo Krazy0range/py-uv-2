@@ -9,7 +9,25 @@ class Controller:
         self.playback_file = ''
     
     def get_key(self):
-        return chr(ord(msvcrt.getch())) if msvcrt.kbhit() else None
+        
+        def getkey():
+            c1 = msvcrt.getch()
+            if c1 in (b'\x00', b'\xe0'):
+                c2 = msvcrt.getch()
+                if c2 == '[':
+                    c3 = msvcrt.getch()
+                    return arrows.get(c3, ' ')
+                return {b'H': 'up', 
+                        b'P': 'down',
+                        b'M': 'right',
+                        b'K': 'left'
+                        }.get(c2, c1 + c2)
+            else:
+                return chr(ord(c1))
+            
+        # return chr(ord(msvcrt.getch())) if msvcrt.kbhit() else None
+        # return chr(ord(getkey())) if msvcrt.kbhit() else None
+        return getkey() if msvcrt.kbhit() else None
     
     def update(self, model):
         self.handle_keys(model)
@@ -43,6 +61,12 @@ class Controller:
         if not key:
             pass
         
+        elif key == 'up':
+            model.selected_song_index -= 1
+        
+        elif key == 'down':
+            model.selected_song_index += 1
+        
         elif key == '\t':
             if model.focus == 'console':
                 model.focus = 'search'
@@ -52,8 +76,16 @@ class Controller:
         elif model.focus == 'console':
             
             if key == '\r':
-                command = model.console
-                model.console = ''
+                if len(model.console) > 0:
+                    command = model.console
+                    model.console = ''
+                else:
+                    model.queue.append(model.mp3_files[model.selected_song_index])
+                    if len(model.queue) == 1:
+                        if self.playback_file != model.queue[0]:
+                            self.playback_file = model.queue[0]
+                            self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
+                        self.playback.play()
                 
             elif key == '\x08' or key == '.':
                 if len(model.console) > 0:
