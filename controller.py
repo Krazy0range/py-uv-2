@@ -14,13 +14,14 @@ class Controller:
             c1 = msvcrt.getch()
             if c1 in (b'\x00', b'\xe0'):
                 c2 = msvcrt.getch()
-                if c2 == '[':
-                    c3 = msvcrt.getch()
-                    return arrows.get(c3, ' ')
                 return {b'H': 'up', 
                         b'P': 'down',
                         b'M': 'right',
-                        b'K': 'left'
+                        b'K': 'left',
+                        b'\x8d': 'ctrl-up',
+                        b'\x91': 'ctrl-down',
+                        b't': 'ctrl-right',
+                        b's': 'ctrl-left'
                         }.get(c2, c1 + c2)
             else:
                 return chr(ord(c1))
