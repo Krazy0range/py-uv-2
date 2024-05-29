@@ -126,6 +126,27 @@ class Controller:
         return command
 
     def handle_queue_keys(self, model, key):
+        
+        def scroll_up():
+            model.panel_queue.selected_index -= 1
+                
+            if model.panel_queue.selected_index >= len(model.queue):
+                model.panel_queue.selected_index = len(model.queue) - 1
+                
+            if model.panel_queue.selected_index < model.panel_queue.scroll:
+                model.panel_queue.scroll = model.panel_queue.selected_index
+                model.panel_queue.full_update = True
+        
+        def scroll_down():
+            model.panel_queue.selected_index += 1
+                
+            if model.panel_queue.selected_index >= len(model.queue):
+                model.panel_queue.selected_index = len(model.queue) - 1
+                
+            if model.panel_queue.selected_index > model.panel_queue.scroll + model.panel_queue.scroll_height:
+                model.panel_queue.scroll = model.panel_queue.selected_index - model.panel_queue.scroll_height
+                model.panel_queue.full_update = True
+        
         if key == '\r':
             del model.queue[model.panel_queue.selected_index]
             model.panel_queue.full_update = True
@@ -141,40 +162,18 @@ class Controller:
                 
         elif key == 'up':
             if model.panel_queue.selected_index > 0:
-                model.panel_queue.selected_index -= 1
-                    
-                if model.panel_queue.selected_index >= len(model.queue):
-                    model.panel_queue.selected_index = len(model.queue) - 1
-                    
-                if model.panel_queue.selected_index < model.panel_queue.scroll:
-                    model.panel_queue.scroll = model.panel_queue.selected_index
-                    model.panel_queue.full_update = True
-            
+                scroll_up()
+                
         elif key == 'down':
             if model.panel_queue.selected_index < len(model.queue) - 1:
-                model.panel_queue.selected_index += 1
-                    
-                if model.panel_queue.selected_index >= len(model.queue):
-                    model.panel_queue.selected_index = len(model.queue) - 1
-                    
-                if model.panel_queue.selected_index > model.panel_queue.scroll + model.panel_queue.scroll_height:
-                    model.panel_queue.scroll = model.panel_queue.selected_index - model.panel_queue.scroll_height
-                    model.panel_queue.full_update = True
+                scroll_down()
 
         elif key == 'ctrl-up':
             if model.panel_queue.selected_index > 0:
                 i, j = model.panel_queue.selected_index, model.panel_queue.selected_index - 1
                 model.queue[j], model.queue[i] = model.queue[i], model.queue[j]
 
-                    # copied from above, needs to be refactored
-                    
-                model.panel_queue.selected_index -= 1
-                    
-                if model.panel_queue.selected_index >= len(model.queue):
-                    model.panel_queue.selected_index = len(model.queue) - 1
-                    
-                if model.panel_queue.selected_index < model.panel_queue.scroll:
-                    model.panel_queue.scroll = model.panel_queue.selected_index
+                scroll_up()
                     
                 model.panel_queue.full_update = True
             
@@ -183,15 +182,7 @@ class Controller:
                 i, j = model.panel_queue.selected_index, model.panel_queue.selected_index + 1
                 model.queue[j], model.queue[i] = model.queue[i], model.queue[j]
 
-                    # copied from above, needs to be refactored
-                    
-                model.panel_queue.selected_index += 1
-                    
-                if model.panel_queue.selected_index >= len(model.queue):
-                    model.panel_queue.selected_index = len(model.queue) - 1
-                    
-                if model.panel_queue.selected_index > model.panel_queue.scroll + model.panel_queue.scroll_height:
-                    model.panel_queue.scroll = model.panel_queue.selected_index - model.panel_queue.scroll_height
+                scroll_down()
                     
                 model.panel_queue.full_update = True
 
