@@ -183,6 +183,40 @@ class Controller:
                     if model.panel_queue.selected_index > model.panel_queue.scroll + model.panel_queue.scroll_height:
                         model.panel_queue.scroll = model.panel_queue.selected_index - model.panel_queue.scroll_height
                         model.panel_queue.full_update = True
+
+            elif key == 'ctrl-up':
+                if model.panel_queue.selected_index > 0:
+                    i, j = model.panel_queue.selected_index, model.panel_queue.selected_index - 1
+                    model.queue[j], model.queue[i] = model.queue[i], model.queue[j]
+
+                    # copied from above, needs to be refactored
+                    
+                    model.panel_queue.selected_index -= 1
+                    
+                    if model.panel_queue.selected_index >= len(model.queue):
+                        model.panel_queue.selected_index = len(model.queue) - 1
+                    
+                    if model.panel_queue.selected_index < model.panel_queue.scroll:
+                        model.panel_queue.scroll = model.panel_queue.selected_index
+                    
+                    model.panel_queue.full_update = True
+            
+            elif key == 'ctrl-down':
+                if model.panel_queue.selected_index < len(model.queue) - 1:
+                    i, j = model.panel_queue.selected_index, model.panel_queue.selected_index + 1
+                    model.queue[j], model.queue[i] = model.queue[i], model.queue[j]
+
+                    # copied from above, needs to be refactored
+                    
+                    model.panel_queue.selected_index += 1
+                    
+                    if model.panel_queue.selected_index >= len(model.queue):
+                        model.panel_queue.selected_index = len(model.queue) - 1
+                    
+                    if model.panel_queue.selected_index < model.panel_queue.scroll:
+                        model.panel_queue.scroll = model.panel_queue.selected_index
+                    
+                    model.panel_queue.full_update = True
         
         elif model.focused_panel == model.panel_console:
             
