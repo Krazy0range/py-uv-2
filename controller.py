@@ -2,6 +2,18 @@ import msvcrt
 import ctypes
 from just_playback import Playback
 
+# TODO
+# TODO refactor Controller.handle_keys(self, model)
+# TODO   it is getting too big lol
+# TODO   if else statements go brrr
+# TODO
+# TODO add selection looping instead of just capping at ends
+# TODO   will require some good refactoring to code efficiently
+# TODO   so good motivation to refactor lol
+# TODO
+# TODO very poggers
+# TODO
+
 class Controller:
     
     def __init__(self):
