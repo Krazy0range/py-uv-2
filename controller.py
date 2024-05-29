@@ -112,6 +112,7 @@ class Controller:
             model.panel_library.full_update = True
 
     def handle_console_keys(self, model, key):
+        command = ''
         if key == '\r':
                 command = model.console
                 model.console = ''
@@ -189,8 +190,8 @@ class Controller:
                 if model.panel_queue.selected_index >= len(model.queue):
                     model.panel_queue.selected_index = len(model.queue) - 1
                     
-                if model.panel_queue.selected_index < model.panel_queue.scroll:
-                    model.panel_queue.scroll = model.panel_queue.selected_index
+                if model.panel_queue.selected_index > model.panel_queue.scroll + model.panel_queue.scroll_height:
+                    model.panel_queue.scroll = model.panel_queue.selected_index - model.panel_queue.scroll_height
                     
                 model.panel_queue.full_update = True
 
