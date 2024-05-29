@@ -21,7 +21,9 @@ class Controller:
                         b'\x8d': 'ctrl-up',
                         b'\x91': 'ctrl-down',
                         b't': 'ctrl-right',
-                        b's': 'ctrl-left'
+                        b's': 'ctrl-left',
+                        b'G': 'home',
+                        b'O': 'end'
                         }.get(c2, c1 + c2)
             else:
                 return chr(ord(c1))
@@ -62,7 +64,23 @@ class Controller:
         if not key:
             pass
         
-        elif key == '\t':
+        elif key == 'home':
+            
+            # cycle through focuses backwards
+            
+            if model.focused_panel == model.panel_library:
+                model.focused_panel = model.panel_search
+            
+            elif model.focused_panel == model.panel_search:
+                model.focused_panel = model.panel_console
+            
+            elif model.focused_panel == model.panel_console:
+                model.focused_panel = model.panel_queue
+            
+            elif model.focused_panel == model.panel_queue:
+                model.focused_panel = model.panel_library
+        
+        elif key == 'end' or key == '\t':
             
             # cycle through focuses
             
