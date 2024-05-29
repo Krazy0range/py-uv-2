@@ -90,7 +90,23 @@ class Controller:
                 
             elif key == 'up':
                 if model.panel_library.selected_index > 0:
-                    model.panel_library.selected_index -= 1
+                    
+                    search_songs = []
+                    search_songs_local_index = 0
+                    
+                    if not model.search:
+                        model.panel_library.selected_index -= 1
+                    else:
+                        songs = list(enumerate(model.mp3_files))
+                        search_songs = list(filter(lambda x: model.search.lower() in x[1].lower(), songs))
+                        if len(search_songs) > 0:
+                            next_index = search_songs[0][0]
+                            for j, (i, song) in enumerate(search_songs):
+                                if i < model.panel_library.selected_index:
+                                    next_index = i
+                                    search_songs_local_index = j
+                                else: break
+                            model.panel_library.selected_index = next_index
                     
                     if model.panel_library.selected_index >= len(model.mp3_files):
                         model.panel_library.selected_index = len(model.mp3_files)
@@ -101,14 +117,35 @@ class Controller:
             
             elif key == 'down':
                 if model.panel_library.selected_index < len(model.mp3_files) - 1:
-                    model.panel_library.selected_index += 1
+                    
+                    search_songs = []
+                    search_songs_local_index = 0
+                    
+                    if not model.search:
+                        model.panel_library.selected_index += 1
+                    else:
+                        songs = list(enumerate(model.mp3_files))
+                        search_songs = list(filter(lambda x: model.search.lower() in x[1].lower(), songs))
+                        if len(search_songs) > 0:
+                            next_index = search_songs[-1][0]
+                            for j, (i, song) in enumerate(search_songs):
+                                if i > model.panel_library.selected_index:
+                                    next_index = i
+                                    search_songs_local_index = j
+                                    break
+                            model.panel_library.selected_index = next_index
                     
                     if model.panel_library.selected_index >= len(model.mp3_files):
                         model.panel_library.selected_index = len(model.mp3_files) - 1                   
                     
-                    if model.panel_library.selected_index > model.panel_library.scroll + model.panel_library.scroll_height:
-                        model.panel_library.scroll = model.panel_library.selected_index - model.panel_library.scroll_height
-                        model.panel_library.full_update = True
+                    if not model.search:
+                        if model.panel_library.selected_index > model.panel_library.scroll + model.panel_library.scroll_height:
+                            model.panel_library.scroll = model.panel_library.selected_index - model.panel_library.scroll_height
+                            model.panel_library.full_update = True
+                    else:
+                        if search_songs_local_index > model.panel_library.scroll_height:
+                            model.panel_library.scroll = search_songs[search_songs_local_index - model.panel_library.scroll_height][0]
+                            model.panel_library.full_update = True
 
         elif model.focused_panel == model.panel_queue:
             
