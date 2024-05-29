@@ -3,10 +3,6 @@ import ctypes
 from just_playback import Playback
 
 # TODO
-# TODO refactor Controller.handle_keys(self, model)
-# TODO   it is getting too big lol
-# TODO   if else statements go brrr
-# TODO
 # TODO add selection looping instead of just capping at ends
 # TODO   will require some good refactoring to code efficiently
 # TODO   so good motivation to refactor lol
@@ -78,204 +74,217 @@ class Controller:
         
         elif key == 'home':
             
-            # cycle through focuses backwards
-            
-            if model.focused_panel == model.panel_library:
-                model.focused_panel = model.panel_search
-            
-            elif model.focused_panel == model.panel_search:
-                model.focused_panel = model.panel_console
-            
-            elif model.focused_panel == model.panel_console:
-                model.focused_panel = model.panel_queue
-            
-            elif model.focused_panel == model.panel_queue:
-                model.focused_panel = model.panel_library
+            self.cycle_focuses_backwards(model)
         
         elif key == 'end' or key == '\t':
             
-            # cycle through focuses
-            
-            if model.focused_panel == model.panel_library:
-                model.focused_panel = model.panel_queue
-
-            elif model.focused_panel == model.panel_queue:
-                model.focused_panel = model.panel_console
-
-            elif model.focused_panel == model.panel_console:
-                model.focused_panel = model.panel_search
-
-            elif model.focused_panel == model.panel_search:
-                model.focused_panel = model.panel_library
+            self.cycle_focuses(model)
 
         elif model.focused_panel == model.panel_library:
             
-            if key == '\r':
-                model.queue.append(model.mp3_files[model.panel_library.selected_index])
-                if len(model.queue) == 1:
+            self.handle_library_keys(model, key)
+
+        elif model.focused_panel == model.panel_queue:
+            
+            self.handle_queue_keys(model, key)
+        
+        elif model.focused_panel == model.panel_console:
+            
+            command = self.handle_console_keys(model, key)
+        
+        elif model.focused_panel == model.panel_search:
+            
+            self.handle_search_keys(model, key)
+        
+        model.command = command
+
+    def handle_search_keys(self, model, key):
+        if key == '\r':
+            pass
+            
+        elif key == '\x08' or key == '.':
+            if len(model.search) > 0:
+                model.search = model.search[:-1]
+                model.panel_library.full_update = True
+            
+        elif key is not None:
+            model.search += key
+            model.panel_library.full_update = True
+
+    def handle_console_keys(self, model, key):
+        if key == '\r':
+                command = model.console
+                model.console = ''
+                
+        elif key == '\x08' or key == '.':
+            if len(model.console) > 0:
+                model.console = model.console[:-1]
+
+        elif key is not None:
+            model.console += key
+        return command
+
+    def handle_queue_keys(self, model, key):
+        if key == '\r':
+            del model.queue[model.panel_queue.selected_index]
+            model.panel_queue.full_update = True
+            if model.panel_queue.selected_index == 0:
+                self.playback.stop()
+                if len(model.queue) > 0:
                     if self.playback_file != model.queue[0]:
                         self.playback_file = model.queue[0]
                         self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
                     self.playback.play()
+            elif model.panel_queue.selected_index == len(model.queue):
+                model.panel_queue.selected_index -= 1
                 
-            elif key == 'up':
-                if model.panel_library.selected_index > 0:
+        elif key == 'up':
+            if model.panel_queue.selected_index > 0:
+                model.panel_queue.selected_index -= 1
                     
-                    search_songs = []
-                    search_songs_local_index = 0
+                if model.panel_queue.selected_index >= len(model.queue):
+                    model.panel_queue.selected_index = len(model.queue) - 1
                     
-                    if not model.search:
-                        model.panel_library.selected_index -= 1
-                    else:
-                        songs = list(enumerate(model.mp3_files))
-                        search_songs = list(filter(lambda x: model.search.lower() in x[1].lower(), songs))
-                        if len(search_songs) > 0:
-                            next_index = search_songs[0][0]
-                            for j, (i, song) in enumerate(search_songs):
-                                if i < model.panel_library.selected_index:
-                                    next_index = i
-                                    search_songs_local_index = j
-                                else: break
-                            model.panel_library.selected_index = next_index
-                    
-                    if model.panel_library.selected_index >= len(model.mp3_files):
-                        model.panel_library.selected_index = len(model.mp3_files)
-                    
-                    if model.panel_library.selected_index < model.panel_library.scroll:
-                        model.panel_library.scroll = model.panel_library.selected_index
-                        model.panel_library.full_update = True
+                if model.panel_queue.selected_index < model.panel_queue.scroll:
+                    model.panel_queue.scroll = model.panel_queue.selected_index
+                    model.panel_queue.full_update = True
             
-            elif key == 'down':
-                if model.panel_library.selected_index < len(model.mp3_files) - 1:
+        elif key == 'down':
+            if model.panel_queue.selected_index < len(model.queue) - 1:
+                model.panel_queue.selected_index += 1
                     
-                    search_songs = []
-                    search_songs_local_index = 0
+                if model.panel_queue.selected_index >= len(model.queue):
+                    model.panel_queue.selected_index = len(model.queue) - 1
                     
-                    if not model.search:
-                        model.panel_library.selected_index += 1
-                    else:
-                        songs = list(enumerate(model.mp3_files))
-                        search_songs = list(filter(lambda x: model.search.lower() in x[1].lower(), songs))
-                        if len(search_songs) > 0:
-                            next_index = search_songs[-1][0]
-                            for j, (i, song) in enumerate(search_songs):
-                                if i > model.panel_library.selected_index:
-                                    next_index = i
-                                    search_songs_local_index = j
-                                    break
-                            model.panel_library.selected_index = next_index
-                    
-                    if model.panel_library.selected_index >= len(model.mp3_files):
-                        model.panel_library.selected_index = len(model.mp3_files) - 1                   
-                    
-                    if not model.search:
-                        if model.panel_library.selected_index > model.panel_library.scroll + model.panel_library.scroll_height:
-                            model.panel_library.scroll = model.panel_library.selected_index - model.panel_library.scroll_height
-                            model.panel_library.full_update = True
-                    else:
-                        if search_songs_local_index > model.panel_library.scroll_height:
-                            model.panel_library.scroll = search_songs[search_songs_local_index - model.panel_library.scroll_height][0]
-                            model.panel_library.full_update = True
+                if model.panel_queue.selected_index > model.panel_queue.scroll + model.panel_queue.scroll_height:
+                    model.panel_queue.scroll = model.panel_queue.selected_index - model.panel_queue.scroll_height
+                    model.panel_queue.full_update = True
 
-        elif model.focused_panel == model.panel_queue:
-            
-            if key == '\r':
-                del model.queue[model.panel_queue.selected_index]
+        elif key == 'ctrl-up':
+            if model.panel_queue.selected_index > 0:
+                i, j = model.panel_queue.selected_index, model.panel_queue.selected_index - 1
+                model.queue[j], model.queue[i] = model.queue[i], model.queue[j]
+
+                    # copied from above, needs to be refactored
+                    
+                model.panel_queue.selected_index -= 1
+                    
+                if model.panel_queue.selected_index >= len(model.queue):
+                    model.panel_queue.selected_index = len(model.queue) - 1
+                    
+                if model.panel_queue.selected_index < model.panel_queue.scroll:
+                    model.panel_queue.scroll = model.panel_queue.selected_index
+                    
                 model.panel_queue.full_update = True
-                if model.panel_queue.selected_index == 0:
-                    self.playback.stop()
-                    if len(model.queue) > 0:
-                        if self.playback_file != model.queue[0]:
-                            self.playback_file = model.queue[0]
-                            self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
-                        self.playback.play()
-                elif model.panel_queue.selected_index == len(model.queue):
-                    model.panel_queue.selected_index -= 1
-                
-            elif key == 'up':
-                if model.panel_queue.selected_index > 0:
-                    model.panel_queue.selected_index -= 1
-                    
-                    if model.panel_queue.selected_index >= len(model.queue):
-                        model.panel_queue.selected_index = len(model.queue) - 1
-                    
-                    if model.panel_queue.selected_index < model.panel_queue.scroll:
-                        model.panel_queue.scroll = model.panel_queue.selected_index
-                        model.panel_queue.full_update = True
             
-            elif key == 'down':
-                if model.panel_queue.selected_index < len(model.queue) - 1:
-                    model.panel_queue.selected_index += 1
-                    
-                    if model.panel_queue.selected_index >= len(model.queue):
-                        model.panel_queue.selected_index = len(model.queue) - 1
-                    
-                    if model.panel_queue.selected_index > model.panel_queue.scroll + model.panel_queue.scroll_height:
-                        model.panel_queue.scroll = model.panel_queue.selected_index - model.panel_queue.scroll_height
-                        model.panel_queue.full_update = True
-
-            elif key == 'ctrl-up':
-                if model.panel_queue.selected_index > 0:
-                    i, j = model.panel_queue.selected_index, model.panel_queue.selected_index - 1
-                    model.queue[j], model.queue[i] = model.queue[i], model.queue[j]
+        elif key == 'ctrl-down':
+            if model.panel_queue.selected_index < len(model.queue) - 1:
+                i, j = model.panel_queue.selected_index, model.panel_queue.selected_index + 1
+                model.queue[j], model.queue[i] = model.queue[i], model.queue[j]
 
                     # copied from above, needs to be refactored
                     
-                    model.panel_queue.selected_index -= 1
+                model.panel_queue.selected_index += 1
                     
-                    if model.panel_queue.selected_index >= len(model.queue):
-                        model.panel_queue.selected_index = len(model.queue) - 1
+                if model.panel_queue.selected_index >= len(model.queue):
+                    model.panel_queue.selected_index = len(model.queue) - 1
                     
-                    if model.panel_queue.selected_index < model.panel_queue.scroll:
-                        model.panel_queue.scroll = model.panel_queue.selected_index
+                if model.panel_queue.selected_index < model.panel_queue.scroll:
+                    model.panel_queue.scroll = model.panel_queue.selected_index
                     
-                    model.panel_queue.full_update = True
-            
-            elif key == 'ctrl-down':
-                if model.panel_queue.selected_index < len(model.queue) - 1:
-                    i, j = model.panel_queue.selected_index, model.panel_queue.selected_index + 1
-                    model.queue[j], model.queue[i] = model.queue[i], model.queue[j]
+                model.panel_queue.full_update = True
 
-                    # copied from above, needs to be refactored
-                    
-                    model.panel_queue.selected_index += 1
-                    
-                    if model.panel_queue.selected_index >= len(model.queue):
-                        model.panel_queue.selected_index = len(model.queue) - 1
-                    
-                    if model.panel_queue.selected_index < model.panel_queue.scroll:
-                        model.panel_queue.scroll = model.panel_queue.selected_index
-                    
-                    model.panel_queue.full_update = True
-        
-        elif model.focused_panel == model.panel_console:
-            
-            if key == '\r':
-                    command = model.console
-                    model.console = ''
+    def handle_library_keys(self, model, key):
+        if key == '\r':
+            model.queue.append(model.mp3_files[model.panel_library.selected_index])
+            if len(model.queue) == 1:
+                if self.playback_file != model.queue[0]:
+                    self.playback_file = model.queue[0]
+                    self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
+                self.playback.play()
                 
-            elif key == '\x08' or key == '.':
-                if len(model.console) > 0:
-                    model.console = model.console[:-1]
-
-            elif key is not None:
-                model.console += key
-        
-        elif model.focused_panel == model.panel_search:
-            
-            if key == '\r':
-                pass
-            
-            elif key == '\x08' or key == '.':
-                if len(model.search) > 0:
-                    model.search = model.search[:-1]
+        elif key == 'up':
+            if model.panel_library.selected_index > 0:
+                search_songs = []
+                search_songs_local_index = 0
+                    
+                if not model.search:
+                    model.panel_library.selected_index -= 1
+                else:
+                    songs = list(enumerate(model.mp3_files))
+                    search_songs = list(filter(lambda x: model.search.lower() in x[1].lower(), songs))
+                    if len(search_songs) > 0:
+                        next_index = search_songs[0][0]
+                        for j, (i, song) in enumerate(search_songs):
+                            if i < model.panel_library.selected_index:
+                                next_index = i
+                                search_songs_local_index = j
+                            else: break
+                        model.panel_library.selected_index = next_index
+                    
+                if model.panel_library.selected_index >= len(model.mp3_files):
+                    model.panel_library.selected_index = len(model.mp3_files)
+                    
+                if model.panel_library.selected_index < model.panel_library.scroll:
+                    model.panel_library.scroll = model.panel_library.selected_index
                     model.panel_library.full_update = True
             
-            elif key is not None:
-                model.search += key
-                model.panel_library.full_update = True
-        
-        model.command = command
+        elif key == 'down':
+            if model.panel_library.selected_index < len(model.mp3_files) - 1:
+                search_songs = []
+                search_songs_local_index = 0
+                    
+                if not model.search:
+                    model.panel_library.selected_index += 1
+                else:
+                    songs = list(enumerate(model.mp3_files))
+                    search_songs = list(filter(lambda x: model.search.lower() in x[1].lower(), songs))
+                    if len(search_songs) > 0:
+                        next_index = search_songs[-1][0]
+                        for j, (i, song) in enumerate(search_songs):
+                            if i > model.panel_library.selected_index:
+                                next_index = i
+                                search_songs_local_index = j
+                                break
+                        model.panel_library.selected_index = next_index
+                    
+                if model.panel_library.selected_index >= len(model.mp3_files):
+                    model.panel_library.selected_index = len(model.mp3_files) - 1                   
+                    
+                if not model.search:
+                    if model.panel_library.selected_index > model.panel_library.scroll + model.panel_library.scroll_height:
+                        model.panel_library.scroll = model.panel_library.selected_index - model.panel_library.scroll_height
+                        model.panel_library.full_update = True
+                else:
+                    if search_songs_local_index > model.panel_library.scroll_height:
+                        model.panel_library.scroll = search_songs[search_songs_local_index - model.panel_library.scroll_height][0]
+                        model.panel_library.full_update = True
+
+    def cycle_focuses(self, model):
+        if model.focused_panel == model.panel_library:
+            model.focused_panel = model.panel_queue
+
+        elif model.focused_panel == model.panel_queue:
+            model.focused_panel = model.panel_console
+
+        elif model.focused_panel == model.panel_console:
+            model.focused_panel = model.panel_search
+
+        elif model.focused_panel == model.panel_search:
+            model.focused_panel = model.panel_library
+
+    def cycle_focuses_backwards(self, model):
+        if model.focused_panel == model.panel_library:
+            model.focused_panel = model.panel_search
+            
+        elif model.focused_panel == model.panel_search:
+            model.focused_panel = model.panel_console
+            
+        elif model.focused_panel == model.panel_console:
+            model.focused_panel = model.panel_queue
+            
+        elif model.focused_panel == model.panel_queue:
+            model.focused_panel = model.panel_library
     
     def handle_commands(self, model):
         # when defining macros don't split the plusses
