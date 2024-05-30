@@ -5,7 +5,7 @@ from controller import Controller
 class Main:
     
     def __init__(self):
-        self.model = Model('C:/Users/Teo/Documents/uv-2/mp3s')
+        self.model = Model('C:/Users/Teo/Documents/uv-2/mp3s', 'C:/Users/Teo/Desktop/hac/piton-stuf/py-uv-2/index.json')
         self.view = View()
         self.controller = Controller()
     

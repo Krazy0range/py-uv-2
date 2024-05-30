@@ -7,12 +7,12 @@ from panel import Library, Queue, Console, Search
 
 class Model:
     
-    def __init__(self, mp3_folder):
+    def __init__(self, mp3_folder, index_file):
         self.mp3_folder = mp3_folder
         
         self.mp3_files = self.get_mp3s_raw()
         
-        self.index_file = "index.json"
+        self.index_file = index_file
         self.index = self.load_index()
         self.refresh_index()
         
