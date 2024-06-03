@@ -208,7 +208,7 @@ class Controller:
                         model.panel_library.selected_index = next_index
                     
                 if model.panel_library.selected_index >= len(model.mp3_files):
-                    model.panel_library.selected_index = len(model.mp3_files)
+                    model.panel_library.selected_index = len(model.mp3_files) - 1
                     
                 if model.panel_library.selected_index < model.panel_library.scroll:
                     model.panel_library.scroll = model.panel_library.selected_index
