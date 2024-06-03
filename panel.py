@@ -123,7 +123,7 @@ class Queue(Panel):
             self.string += str(j) + self.tab(str(j))
             self.string += song[:width-9]
         
-        self.string += self.esc.move(x, y + len(mp3_files))
+        self.string += self.esc.move(x, y + min(len(mp3_files), height+1))
         self.string += self.esc.background_black()
         self.string += (' ' * width)
         

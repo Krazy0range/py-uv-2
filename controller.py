@@ -2,14 +2,6 @@ import msvcrt
 import ctypes
 from just_playback import Playback
 
-# TODO
-# TODO add selection looping instead of just capping at ends
-# TODO   will require some good refactoring to code efficiently
-# TODO   so good motivation to refactor lol
-# TODO
-# TODO very poggers
-# TODO
-
 class Controller:
     
     def __init__(self):
@@ -148,18 +140,19 @@ class Controller:
                 model.panel_queue.full_update = True
         
         if key == '\r':
-            del model.queue[model.panel_queue.selected_index]
-            model.panel_queue.full_update = True
-            if model.panel_queue.selected_index == 0:
-                self.playback.stop()
-                if len(model.queue) > 0:
-                    if self.playback_file != model.queue[0]:
-                        self.playback_file = model.queue[0]
-                        self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
-                    self.playback.play()
-            elif model.panel_queue.selected_index == len(model.queue):
-                model.panel_queue.selected_index -= 1
-                
+            if len(model.queue) > 0:
+                del model.queue[model.panel_queue.selected_index]
+                model.panel_queue.full_update = True
+                if model.panel_queue.selected_index == 0:
+                    self.playback.stop()
+                    if len(model.queue) > 0:
+                        if self.playback_file != model.queue[0]:
+                            self.playback_file = model.queue[0]
+                            self.playback.load_file(f'{model.mp3_folder}/{model.queue[0]}')
+                        self.playback.play()
+                elif model.panel_queue.selected_index == len(model.queue):
+                    model.panel_queue.selected_index -= 1
+
         elif key == 'up':
             if model.panel_queue.selected_index > 0:
                 scroll_up()
