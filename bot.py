@@ -11,13 +11,18 @@ spotify_urls_file = 'C:/Users/Teo/Desktop/spotify-links.txt'
 spotify_urls = []
 with open(spotify_urls_file, 'r') as file:
     spotify_urls = file.readlines()
+
+START_INDEX = 0
     
-spotify_urls = spotify_urls[:]
+spotify_urls = spotify_urls[START_INDEX:]
 
 spotify_converter = 'https://spotifydown.com'
 
 with webdriver.Firefox() as driver:
     for i, spotify_url in enumerate(spotify_urls):
+        
+        print("song number: ", i + START_INDEX)
+        
         # driver.execute_script(f'window.open(\'about:blank\', \'tabulation{i}\')')
         # driver.switch_to.window(f'tabulation{i}')
         driver.get(spotify_converter)
@@ -31,7 +36,7 @@ with webdriver.Firefox() as driver:
         download_button = WebDriverWait(driver, 10).until(expected_conditions.presence_of_element_located((By.XPATH, '//button[contains(., \'Download\')]')))
         driver.execute_script('arguments[0].click()', download_button);
         sleep(0.5)
-        last_download_button = WebDriverWait(driver, 20).until(expected_conditions.presence_of_element_located((By.XPATH, '//a[contains(., \' MP3\')]')))
+        last_download_button = WebDriverWait(driver, 30).until(expected_conditions.presence_of_element_located((By.XPATH, '//a[contains(., \' MP3\')]')))
         driver.execute_script('arguments[0].click()', last_download_button)
         sleep(2)
         
@@ -43,4 +48,5 @@ with webdriver.Firefox() as driver:
         filename_new = filename_new.replace("'", ' ')
         filename_new = filename_new.replace('"', ' ')
         filename_new = filename_new.replace('?', ' ')
+        filename_new = filename_new.replace(':', ' ')
         shutil.move(filename, f'C:/Users/Teo/Documents/uv-2/mp3s-new/{filename_new}.mp3')
