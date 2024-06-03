@@ -64,6 +64,15 @@ class Controller:
         if not key:
             pass
         
+        elif model.queue_only_view and key != '\r' and key != 'up' and key != 'down' and key != 'ctrl-up' and key != 'ctrl-down':
+                
+            model.queue_only_view = False
+            model.reset_screen = True
+            model.panel_library.full_update = True
+            model.panel_queue.full_update = True
+            model.panel_console.full_update = True
+            model.panel_search.full_update = True
+        
         elif key == 'home':
             
             self.cycle_focuses_backwards(model)
@@ -114,7 +123,9 @@ class Controller:
                 model.console = model.console[:-1]
 
         elif key is not None:
+            
             model.console += key
+            
         return command
 
     def handle_queue_keys(self, model, key):
@@ -298,6 +309,13 @@ class Controller:
             model.panel_queue.full_update = True
             model.panel_console.full_update = True
             model.panel_search.full_update = True
+        
+        # queue-only view
+        elif command == '98':
+            model.queue_only_view = True
+            model.reset_screen = True
+            model.panel_queue.full_update = True
+            model.focused_panel = model.panel_queue
         
         # sort by filename
         elif command == '900':

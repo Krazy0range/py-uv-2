@@ -30,6 +30,7 @@ class Model:
         self.syntax_highlight_commands = [
             '9',
             '99',
+            '98',
             '900',
             '901',
             '902',
@@ -67,6 +68,8 @@ class Model:
         self.panel_queue = Queue()
         self.panel_console = Console()
         self.panel_search = Search()
+        
+        self.queue_only_view = False
         
         self.focused_panel = self.panel_library
         
