@@ -245,14 +245,21 @@ class Controller:
                         model.panel_library.selected_index = next_index
                     
                 if model.panel_library.selected_index >= len(model.mp3_files):
-                    model.panel_library.selected_index = len(model.mp3_files) - 1                   
+                    model.panel_library.selected_index = len(model.mp3_files) - 1
                     
                 if not model.search:
                     if model.panel_library.selected_index > model.panel_library.scroll + model.panel_library.scroll_height:
                         model.panel_library.scroll = model.panel_library.selected_index - model.panel_library.scroll_height
                         model.panel_library.full_update = True
                 else:
-                    if search_songs_local_index > model.panel_library.scroll_height:
+                    # TODO FIGURE OUT THIS SUPER ANNOYING BUG AHHHHHHHHHHHHHHHHHHHHH
+                    # reproduce: search missio and move around lol
+                    if search_songs_local_index > model.panel_library.scroll_height + model.panel_library.scroll:
+                        # SONG_AT_TOP_OF_SCREEN = search_songs[search_songs_local_index - model.panel_library.scroll_height]
+                        # SCROLL_OF_THAT_SONG = SONG_AT_TOP_OF_SCREEN[0]
+                        # if search_songs[search_songs_local_index][0] > model.panel_library.scroll_height:
+                            
+                    # if search_songs[search_songs_local_index][0] >= model.panel_library.scroll_height - search_songs[search_songs_local_index - model.panel_library.scroll_height][0]:
                         model.panel_library.scroll = search_songs[search_songs_local_index - model.panel_library.scroll_height][0]
                         model.panel_library.full_update = True
 
