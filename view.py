@@ -38,9 +38,9 @@ class View:
         if not model.queue_only_view:
         
             library = model.panel_library.render(model, 
-                                        x=2, 
+                                        x=0, 
                                         y=1, 
-                                        width=self.engine.width // 2 - 2, 
+                                        width=self.engine.width // 2 - 1, 
                                         height=self.engine.height - 5
                                         )
             self.engine.string(library)
@@ -54,9 +54,9 @@ class View:
             self.engine.string(queue)
             
             console = model.panel_console.render(model,
-                                        x=2,
+                                        x=0,
                                         y=self.engine.height - 2,
-                                        width=self.engine.width // 2 - 2,
+                                        width=self.engine.width // 2 - 1,
                                         height=2
                                         )
             self.engine.string(console)
