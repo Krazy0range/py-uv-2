@@ -42,10 +42,10 @@ class Library(Panel):
             self.string += self.fill(x, y, width, height, self.esc.background_black())
             self.full_update = False
         
-        self.string += self.esc.move(x+2, y+1)
+        self.string += self.esc.move(x+3, y+1)
         self.string += self.esc.background_black() + self.esc.foreground_red() + 'LIBRARY' + self.esc.reset_all()
         
-        x += 2
+        x += 3
         y += 3
         width -= 4
         height -= 4
@@ -146,7 +146,7 @@ class Console(Panel):
             self.string += self.fill(x, y, width, height, self.esc.background_black())
             self.full_update = False
             
-        self.string += self.esc.move(x+2, y+1)
+        self.string += self.esc.move(x+3, y+1)
         self.string += self.esc.background_black()
         self.string += self.esc.foreground_red()
         self.string += self.enhance_console(model)
@@ -154,7 +154,7 @@ class Console(Panel):
             self.string += self.esc.background_red()
             self.string += ' '
         self.string += self.esc.background_black()
-        self.string += ' ' * (width - len(model.console) - 3)
+        self.string += ' ' * (width - len(model.console) - 4)
         
         self.string += self.esc.reset_all()
         return self.string
